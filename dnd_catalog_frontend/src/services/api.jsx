@@ -1,7 +1,12 @@
-﻿import axios from "axios";
+import axios from "axios";
+
+// *** ИСПРАВЛЕНО: Чтение URL из переменной окружения Render/Vite ***
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:7013"; 
+// Мы используем import.meta.env.VITE_API_URL, а localhost оставляем как запасной вариант для локальной разработки.
 
 const api = axios.create({
-    baseURL: "https://localhost:7013/api", // ПОДСТАВЬ СВОЙ ПОРТ
+    // Используем переменную окружения
+    baseURL: `${API_BASE_URL}/api`, 
 });
 
 // ставим JWT токен
