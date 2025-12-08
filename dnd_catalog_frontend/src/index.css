@@ -1,0 +1,166 @@
+:root {
+    --bg-main: #f5f0e6; /* пергамент */
+    --bg-card: #f0e4d0;
+    --border-dark: #4b2b1f;
+    --text-main: #2c1b16;
+    --accent: #b13b2c;
+    --accent-soft: #d18b47;
+    --accent-dark: #7a2416;
+    --shadow-soft: 0 4px 10px rgba(0, 0, 0, 0.18);
+    --radius: 8px;
+    --font-main: "Georgia", "Times New Roman", serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    margin: 0;
+    font-family: var(--font-main);
+    color: var(--text-main);
+    /* --- ОНОВЛЕНИЙ ФОН ІЗ ВАШОЮ КАРТИНКОЮ --- */
+    background-image: url('https://preview.redd.it/wanderers-guide-new-background-artwork-commissioned-by-v0-l7fug98b4use1.jpeg?auto=webp&s=94c85dda68d3c640fc25bf200f2f4a474a62bcf8');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center center;
+    background-color: var(--bg-main);
+    /* ------------------------------------------ */
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.app-root {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: none;
+}
+
+.app-content {
+    flex: 1;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 20px 16px 40px;
+}
+
+/* Карточки / панели */
+.card {
+    background: var(--bg-card);
+    border: 1px solid rgba(75, 43, 31, 0.4);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-soft);
+    padding: 16px 18px;
+    margin-bottom: 16px;
+}
+
+/* Кнопки */
+.btn {
+    display: inline-block;
+    border-radius: 999px;
+    border: 1px solid var(--accent-dark);
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-soft) 100%);
+    color: #fdf7eb;
+    padding: 8px 18px;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.25);
+    transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.12s ease;
+}
+
+    .btn:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.05);
+        box-shadow: 0 5px 10px rgba(0,0,0,0.3);
+    }
+
+    .btn:disabled {
+        opacity: 0.6;
+        cursor: default;
+        transform: none;
+        box-shadow: none;
+    }
+
+/* Вторичная кнопка */
+.btn-outline {
+    background: rgba(245, 240, 230, 0.9);
+    color: var(--accent-dark);
+    border-color: var(--accent-dark);
+}
+
+/* Формы */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+label {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+input, select, textarea {
+    border-radius: 6px;
+    border: 1px solid rgba(75, 43, 31, 0.5);
+    padding: 7px 9px;
+    font-family: inherit;
+    background: rgba(255, 252, 246, 0.95);
+}
+
+    input:focus, select:focus, textarea:focus {
+        outline: none;
+        border-color: var(--accent-dark);
+        box-shadow: 0 0 0 2px rgba(177, 59, 44, 0.25);
+    }
+
+h1, h2, h3 {
+    letter-spacing: 0.03em;
+}
+
+/* Простая сетка */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 12px;
+}
+
+/* Таблица в книжном стиле */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+    .table th,
+    .table td {
+        border: 1px solid rgba(75, 43, 31, 0.4);
+        padding: 6px 8px;
+        font-size: 14px;
+    }
+
+    .table th {
+        background: rgba(177, 59, 44, 0.15);
+    }
+
+    .table tr:nth-child(even) td {
+        background: rgba(255, 252, 246, 0.8);
+    }
+
+/* Маленькие элементы */
+.chip {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 12px;
+    background: rgba(177, 59, 44, 0.12);
+    border: 1px solid rgba(177, 59, 44, 0.4);
+    margin-right: 4px;
+    margin-bottom: 4px;
+}
