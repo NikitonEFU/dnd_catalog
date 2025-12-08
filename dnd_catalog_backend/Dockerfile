@@ -2,15 +2,16 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Копируем файл проекта и восстанавливаем зависимости
-# Это ускоряет сборку, если только зависимости не менялись
-COPY ["dnd_catalog_backend.csproj", "."]
+# ВАЖНОЕ ИЗМЕНЕНИЕ: 
+# Используем команду с wildcard (*.csproj), чтобы скопировать файл
+# В контексте монорепозитория это часто работает лучше.
+
+# Копируем .csproj и восстанавливаем зависимости
+COPY *.csproj . 
 RUN dotnet restore
 
-# Копируем остальной код проекта
+# Копируем остальной код и публикуем приложение
 COPY . .
-
-# Публикуем приложение
 RUN dotnet publish -c Release -o /app/publish
 
 # 2. СТАДИЯ ЗАПУСКА (Используем легкий образ ASP.NET для запуска)
@@ -21,5 +22,4 @@ WORKDIR /app
 COPY --from=build /app/publish .
 
 # Запускаем приложение
-# Убедитесь, что 'dnd_catalog_backend.dll' совпадает с именем вашего основного DLL
 ENTRYPOINT ["dotnet", "dnd_catalog_backend.dll"]
