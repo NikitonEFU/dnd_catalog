@@ -63,6 +63,7 @@ export default function Header() {
                     <Link to="/races">Раси</Link>
                     <Link to="/classes">Класи</Link>
                     <Link to="/abilities">Здібності</Link>
+                    <Link to="/ai">ШІ</Link>
                     {isAuthenticated && <Link to="/account">Акаунт</Link>}
                     {isAdmin && <span style={{ fontStyle: "italic" }}>Адмін</span>}
                 </nav>
