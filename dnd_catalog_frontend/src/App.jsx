@@ -41,6 +41,7 @@ function AppInner() {
                     <Route path="/races" element={<RacesPage />} />
                     <Route path="/classes" element={<ClassesPage />} />
                     <Route path="/abilities" element={<AbilitiesPage />} />
+                    <Route path="/ai" element={<AiHelperPage />} />
 
                     <Route
                         path="/account"
