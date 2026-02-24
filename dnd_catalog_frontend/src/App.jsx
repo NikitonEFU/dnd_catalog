@@ -12,11 +12,12 @@ import ClassesPage from "./pages/ClassesPage";
 import AbilitiesPage from "./pages/AbilitiesPage";
 import CharacterEditorPage from "./pages/CharacterEditorPage";
 import AccountPage from "./pages/AccountPage";
+import AiHelperPage from "./pages/AiHelperPage";
 
 function AppInner() {
     const { token } = useAuth();
 
-    // каждый рендер будем обновлять токен в axios
+    // ГЄГ Г¦Г¤Г»Г© Г°ГҐГ­Г¤ГҐГ° ГЎГіГ¤ГҐГ¬ Г®ГЎГ­Г®ГўГ«ГїГІГј ГІГ®ГЄГҐГ­ Гў axios
     setAuthToken(token);
 
     return (
