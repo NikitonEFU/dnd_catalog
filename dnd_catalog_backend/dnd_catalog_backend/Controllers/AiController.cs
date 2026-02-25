@@ -34,7 +34,7 @@ public class AiController : ControllerBase
         // Можешь поменять модель.
         // Часто у OpenRouter есть бесплатные варианты с суффиксом :free (если доступны на твоём аккаунте).
         // Пример: "mistralai/mistral-7b-instruct:free"
-       var model = "openchat/openchat-3.5-0106";
+       var model = "meta-llama/llama-3-8b-instruct";
 
         var system = """
 Ты — помощник по D&D 5e. Отвечай структурировано:
