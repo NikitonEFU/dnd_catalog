@@ -27,14 +27,14 @@ public class AiController : ControllerBase
         if (string.IsNullOrEmpty(prompt))
             return BadRequest(new { message = "prompt is required" });
 
-        // ✅ Берём HF ключ из env/Render
-        var hfKey = _config["HF_API_KEY"];
-        if (string.IsNullOrEmpty(hfKey))
-            return StatusCode(500, new { message = "HF_API_KEY is missing" });
+        var apiKey = _config["OPENROUTER_API_KEY"];
+        if (string.IsNullOrEmpty(apiKey))
+            return StatusCode(500, new { message = "OPENROUTER_API_KEY is missing" });
 
-        // ✅ Модель (если не работает — поменяй на другую)
-        var model = "HuggingFaceH4/zephyr-7b-beta";
-        var url = $"https://api-inference.huggingface.co/models/{model}";
+        // Можешь поменять модель.
+        // Часто у OpenRouter есть бесплатные варианты с суффиксом :free (если доступны на твоём аккаунте).
+        // Пример: "mistralai/mistral-7b-instruct:free"
+        var model = "mistralai/mistral-7b-instruct";
 
         var system = """
 Ты — помощник по D&D 5e. Отвечай структурировано:
@@ -50,68 +50,56 @@ public class AiController : ControllerBase
 Пиши понятно, без воды. Если чего-то не хватает — задай 2-3 уточняющих вопроса.
 """;
 
-        // Для instruct-моделей хорошо работает формат "System/User"
-        var fullPrompt =
-$@"[SYSTEM]
-{system}
-
-[USER]
-{prompt}
-
-[ASSISTANT]
-";
-
         var payload = new
         {
-            inputs = fullPrompt,
-            parameters = new
+            model = model,
+            messages = new object[]
             {
-                max_new_tokens = 500,
-                temperature = 0.7,
-                top_p = 0.9,
-                return_full_text = false
+                new { role = "system", content = system },
+                new { role = "user", content = prompt }
             },
-            options = new
-            {
-                wait_for_model = true
-            }
+            temperature = 0.7,
+            max_tokens = 700
         };
 
         var client = _httpClientFactory.CreateClient();
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", hfKey);
 
-        var http = new HttpRequestMessage(HttpMethod.Post, url);
+        var http = new HttpRequestMessage(HttpMethod.Post, "https://openrouter.ai/api/v1/chat/completions");
+        http.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+
+        // Optional, но полезно (для OpenRouter атрибуции)
+        var siteUrl = _config["OPENROUTER_SITE_URL"] ?? "https://dnd-catalog-frontend.onrender.com";
+        var appName = _config["OPENROUTER_APP_NAME"] ?? "DnD Grimoire";
+        http.Headers.TryAddWithoutValidation("HTTP-Referer", siteUrl);
+        http.Headers.TryAddWithoutValidation("X-OpenRouter-Title", appName);
+
         http.Content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
 
         var resp = await client.SendAsync(http);
         var json = await resp.Content.ReadAsStringAsync();
 
-        // HuggingFace часто возвращает 503 пока модель грузится, или 429 лимит
         if (!resp.IsSuccessStatusCode)
         {
+            // Вернём сырой ответ, чтобы ты видел причину (лимиты/нет доступа/и т.д.)
             return StatusCode((int)resp.StatusCode, new
             {
-                message = "HuggingFace error",
+                message = "OpenRouter error",
                 details = json,
                 model
             });
         }
 
-        // Обычно ответ выглядит так: [ { "generated_text": "..." } ]
+        // OpenAI-совместимый формат: choices[0].message.content
         try
         {
             using var doc = JsonDocument.Parse(json);
+            var content = doc.RootElement
+                .GetProperty("choices")[0]
+                .GetProperty("message")
+                .GetProperty("content")
+                .GetString() ?? "";
 
-            if (doc.RootElement.ValueKind == JsonValueKind.Array &&
-                doc.RootElement.GetArrayLength() > 0 &&
-                doc.RootElement[0].TryGetProperty("generated_text", out var gt))
-            {
-                var text = gt.GetString() ?? "";
-                return Ok(new { text, model });
-            }
-
-            // Иногда формат другой — вернём сырой json, чтобы увидеть
-            return Ok(new { text = json, model });
+            return Ok(new { text = content, model });
         }
         catch
         {
