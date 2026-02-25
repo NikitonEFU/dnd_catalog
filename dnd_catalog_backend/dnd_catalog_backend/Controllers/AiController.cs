@@ -19,9 +19,7 @@ public class AiController : ControllerBase
 
     public record AiRequest(string Prompt);
 
-    // Если хочешь доступно всем — раскомментируй и удали [Authorize]
-    // [AllowAnonymous]
-    [Authorize]
+    [AllowAnonymous] // <-- публично, без логина
     [HttpPost("character-help")]
     public async Task<IActionResult> CharacterHelp([FromBody] AiRequest req)
     {
@@ -60,17 +58,32 @@ public class AiController : ControllerBase
         var client = _httpClientFactory.CreateClient();
         var http = new HttpRequestMessage(HttpMethod.Post, "https://api.openai.com/v1/responses");
         http.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
-        http.Content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+        http.Content = new StringContent(
+            JsonSerializer.Serialize(payload),
+            Encoding.UTF8,
+            "application/json"
+        );
 
-        var resp = await client.SendAsync(http);
-        var json = await resp.Content.ReadAsStringAsync();
+        try
+        {
+            var resp = await client.SendAsync(http);
+            var json = await resp.Content.ReadAsStringAsync();
 
-        if (!resp.IsSuccessStatusCode)
-            return StatusCode((int)resp.StatusCode, new { message = "OpenAI error", details = json });
+            if (!resp.IsSuccessStatusCode)
+                return StatusCode((int)resp.StatusCode, new { message = "OpenAI error", details = json });
 
-        using var doc = JsonDocument.Parse(json);
-        var text = doc.RootElement.GetProperty("output_text").GetString() ?? "";
+            using var doc = JsonDocument.Parse(json);
 
-        return Ok(new { text });
+            // На всякий случай: если output_text отсутствует, не падаем
+            var text = doc.RootElement.TryGetProperty("output_text", out var ot)
+                ? (ot.GetString() ?? "")
+                : "";
+
+            return Ok(new { text });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "AI request failed", details = ex.Message });
+        }
     }
 }
